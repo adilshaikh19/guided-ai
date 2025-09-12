@@ -4,10 +4,52 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Menu } from 'lucide-react';
-import { ChatSession } from '@prisma/client';
 import { cn } from '@/lib/utils';
 
-export function Sidebar({ sessionsQuery, currentSessionId, setCurrentSessionId, newSessionName, setNewSessionName, createSessionMutation, isSidebarOpen, isSidebarVisible, setIsSidebarOpen }: any) {
+// This type represents the session data as it exists on the client,
+// after being serialized from the server (Dates become strings).
+type ClientChatSession = {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+  userId: string | null;
+};
+
+// Define types for the component props to avoid using 'any'
+type SessionsQuery = {
+  data: { items: ClientChatSession[] } | undefined;
+  // Add other properties from the query result if needed, e.g., isLoading, error
+};
+
+type CreateSessionMutation = {
+  mutate: (variables: { name: string }) => void;
+  isPending: boolean;
+};
+
+type SidebarProps = {
+  sessionsQuery: SessionsQuery;
+  currentSessionId: string | null;
+  setCurrentSessionId: (id: string | null) => void;
+  newSessionName: string;
+  setNewSessionName: (name: string) => void;
+  createSessionMutation: CreateSessionMutation;
+  isSidebarOpen: boolean;
+  isSidebarVisible: boolean;
+  setIsSidebarOpen: (isOpen: boolean) => void;
+};
+
+export function Sidebar({ 
+  sessionsQuery, 
+  currentSessionId, 
+  setCurrentSessionId, 
+  newSessionName, 
+  setNewSessionName, 
+  createSessionMutation, 
+  isSidebarOpen, 
+  isSidebarVisible, 
+  setIsSidebarOpen 
+}: SidebarProps) {
 
   return (
     <div className={cn("flex-shrink-0 transition-all duration-300 ease-in-out border-r border-border/50", isSidebarOpen ? "w-80" : "w-0")}>
@@ -31,7 +73,7 @@ export function Sidebar({ sessionsQuery, currentSessionId, setCurrentSessionId, 
 
           <ScrollArea className="h-[calc(100vh-140px)]">
             <div className="p-2 space-y-1">
-              {sessionsQuery.data?.items?.map((s: ChatSession) => (
+              {sessionsQuery.data?.items?.map((s: ClientChatSession) => (
                 <Button
                   key={s.id}
                   variant={currentSessionId === s.id ? 'secondary' : 'ghost'}

@@ -5,18 +5,36 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
-import { Send, Menu } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { RefObject } from 'react';
 
+// A basic user type, adjust if you have a more specific user model
+type User = {
+  name?: string | null;
+};
+
+// Represents a single message in the chat
+type ChatMessage = {
+  id: string;
+  role: 'USER' | 'ASSISTANT';
+  content: string;
+  createdAt: string | Date;
+};
+
+// Basic type for a mutation object, e.g., from React Query
+type MutationState = {
+  isPending: boolean;
+};
+
 type ChatMessagesProps = {
-  user: any;
+  user: User;
   currentSessionId: string | null;
-  displayMessages: any[];
+  displayMessages: ChatMessage[];
   isAiTyping: boolean;
   message: string;
   setMessage: (msg: string) => void;
   handleSend: () => void;
-  sendMutation: any;
+  sendMutation: MutationState;
   scrollAreaRef: RefObject<HTMLDivElement | null>;
   handleLogout: () => void;
 };

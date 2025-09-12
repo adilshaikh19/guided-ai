@@ -12,7 +12,7 @@ export async function createContext() {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
         const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
         return user;
-      } catch (e) {
+      } catch {
         return null;
       }
     }

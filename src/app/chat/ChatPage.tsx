@@ -3,12 +3,8 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { trpc } from '@/utils/trpc';
-import type { Message } from '@prisma/client';
-import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Menu, Send } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Sidebar } from './Sidebar';
 import { ChatMessages } from './ChatMessages';
 

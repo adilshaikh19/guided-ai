@@ -45,9 +45,9 @@ async function generateWithGemini(messages: { role: "user" | "assistant"; conten
     throw new Error(`Gemini API error: ${resp.status} ${text}`);
   }
 
-  const data = (await resp.json()) as any;
+  const data = (await resp.json()) as GeminiResponse;
   const candidate = data?.candidates?.[0];
-  const reply = candidate?.content?.parts?.map((p: any) => p?.text).join("") ?? "";
+  const reply = candidate?.content?.parts?.map((p: GeminiPart) => p?.text).join("") ?? "";
   return reply.trim() || "I’m sorry, I couldn’t generate a response right now.";
 }
 

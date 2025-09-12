@@ -21,7 +21,7 @@ export default function LoginPage() {
       // On successful login, redirect
       router.push('/chat'); // Redirect to a protected page
     },
-    onError: (error: any) => {
+    onError: (error: { message: string }) => {
       setError(error.message);
     },
   });
@@ -33,7 +33,7 @@ export default function LoginPage() {
       setError('');
       alert('Registration successful! Please log in.');
     },
-    onError: (error: any) => {
+    onError: (error: { message: string }) => {
       setError(error.message);
     },
   });
