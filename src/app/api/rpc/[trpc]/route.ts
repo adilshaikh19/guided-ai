@@ -7,7 +7,7 @@ const handler = (req: Request) =>
     endpoint: "/api/rpc",
     req,
     router: appRouter,
-    createContext: () => createContext(req),
+    createContext: () => createContext(),
   });
 
 export { handler as GET, handler as POST };
