@@ -3,6 +3,21 @@ import { protectedProcedure, router } from "../trpc";
 import { prisma } from "@/utils/prisma";
 import { TRPCError } from "@trpc/server";
 
+type GeminiPart = {
+  text?: string;
+};
+
+type GeminiCandidate = {
+  content?: {
+    parts?: GeminiPart[];
+  };
+};
+
+type GeminiResponse = {
+  candidates?: GeminiCandidate[];
+};
+
+
 // Basic prompt to align AI as a career counselor
 const SYSTEM_PROMPT = `You are an experienced AI Career Counselor. Provide actionable, empathetic, and practical guidance on careers, skills, resumes, job search strategy, interview preparation, and growth planning. Ask clarifying questions when needed and keep responses concise but thorough.`;
 

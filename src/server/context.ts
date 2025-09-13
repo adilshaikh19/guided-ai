@@ -1,27 +1,29 @@
 import { inferAsyncReturnType } from "@trpc/server";
 import * as jwt from "jsonwebtoken";
 import { prisma } from "@/utils/prisma";
-import { cookies } from 'next/headers';
 
-export async function createContext() {
-  async function getUserFromCookie() {
-    const cookieStore = cookies();
-    const token = cookieStore.get('auth_token')?.value;
-    if (token) {
+export async function createContext(req: Request) {
+  const cookieHeader = req.headers.get("cookie");
+  let user = null;
+
+  if (cookieHeader) {
+    const authToken = cookieHeader
+      .split(";")
+      .map(c => c.trim())
+      .find(c => c.startsWith("auth_token="))
+      ?.split("=")[1];
+
+    if (authToken) {
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { userId: string };
-        const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
-        return user;
+        const decoded = jwt.verify(authToken, process.env.JWT_SECRET!) as { userId: string };
+        user = await prisma.user.findUnique({ where: { id: decoded.userId } });
       } catch {
-        return null;
+        user = null;
       }
     }
-    return null;
   }
-  const user = await getUserFromCookie();
-  return {
-    user,
-  };
+
+  return { user };
 }
 
 export type Context = inferAsyncReturnType<typeof createContext>;

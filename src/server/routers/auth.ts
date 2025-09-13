@@ -75,7 +75,7 @@ export const authRouter = router({
         expiresIn: '1d', // Token expires in 1 day
       });
 
-      cookies().set('auth_token', token, {
+      (await cookies()).set('auth_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         sameSite: 'strict',
@@ -86,8 +86,8 @@ export const authRouter = router({
       return { success: true };
     }),
     
-    logout: publicProcedure.mutation(() => {
-      cookies().set('auth_token', '', {
+    logout: publicProcedure.mutation(async () => {
+      (await cookies()).set('auth_token', '', {
         httpOnly: true,
         secure: process.env.NODE_ENV !== 'development',
         sameSite: 'strict',
