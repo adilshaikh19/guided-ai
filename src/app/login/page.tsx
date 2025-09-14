@@ -21,7 +21,7 @@ export default function LoginPage() {
       router.push('/chat');
     },
     onError: (error: { message: string }) => {
-      setError(error.message || 'Login failed. Please try again.');
+      setError('Login failed. Please try again.');
     },
   });
 
