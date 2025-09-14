@@ -22,7 +22,7 @@ type ClientChatSession = {
 type SessionsQuery = {
   data: { items: ClientChatSession[] } | undefined;
   // Add other properties from the query result if needed, e.g., isLoading, error
-  refetch?: () => Promise<any>;
+  refetch?: () => Promise<unknown>;
 };
 
 type CreateSessionMutation = {
