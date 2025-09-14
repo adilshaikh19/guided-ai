@@ -18,34 +18,41 @@ export default function LoginPage() {
 
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: () => {
-      // On successful login, redirect
-      router.push('/chat'); // Redirect to a protected page
+      router.push('/chat');
     },
     onError: (error: { message: string }) => {
-      setError(error.message);
+      setError(error.message || 'Login failed. Please try again.');
     },
   });
 
   const registerMutation = trpc.auth.register.useMutation({
     onSuccess: () => {
-      // On successful registration, switch to login view
       setIsRegistering(false);
       setError('');
       alert('Registration successful! Please log in.');
     },
     onError: (error: { message: string }) => {
-      setError(error.message);
+      setError(error.message || 'Registration failed. Please try again.');
     },
   });
 
+  const isSubmitting = loginMutation.isPending || registerMutation.isPending;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return; // guard double submit
     setError('');
     if (isRegistering) {
       registerMutation.mutate({ email, password, name });
     } else {
       loginMutation.mutate({ email, password });
     }
+  };
+
+  const toggleMode = () => {
+    if (isSubmitting) return; // prevent toggle while in-flight
+    setError('');
+    setIsRegistering((v) => !v);
   };
 
   return (
@@ -63,26 +70,63 @@ export default function LoginPage() {
               {isRegistering && (
                 <div className="flex flex-col space-y-1.5">
                   <Label htmlFor="name">Name</Label>
-                  <Input id="name" placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required />
+                  <Input
+                    id="name"
+                    placeholder="Your name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                    disabled={isSubmitting}
+                  />
                 </div>
               )}
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="Your email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                />
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="Your password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={isSubmitting}
+                />
               </div>
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              <Button type="submit" className="w-full">
-                {isRegistering ? 'Register' : 'Login'}
+
+              {/* Error message area */}
+              {error && (
+                <p className="text-red-500 text-sm" role="alert" aria-live="polite">
+                  {error}
+                </p>
+              )}
+
+              <Button type="submit" className="w-full" disabled={isSubmitting}>
+                {isSubmitting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                    {isRegistering ? 'Registering...' : 'Logging in...'}
+                  </span>
+                ) : (
+                  isRegistering ? 'Register' : 'Login'
+                )}
               </Button>
             </div>
           </form>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <Button variant="link" onClick={() => setIsRegistering(!isRegistering)}>
+          <Button variant="link" onClick={toggleMode} disabled={isSubmitting}>
             {isRegistering ? 'Already have an account? Login' : "Don't have an account? Register"}
           </Button>
         </CardFooter>

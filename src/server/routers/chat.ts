@@ -207,5 +207,22 @@ export const chatRouter = router({
 
       return { sessionId: session.id, reply };
     }),
+
+  // 5) Delete a session and its messages
+  deleteSession: protectedProcedure
+    .input(z.object({ sessionId: z.string() }))
+    .mutation(async ({ input, ctx }) => {
+      const session = await prisma.chatSession.findUnique({ where: { id: input.sessionId } });
+      if (!session || session.userId !== ctx.user.id) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
+      await prisma.$transaction([
+        prisma.message.deleteMany({ where: { sessionId: input.sessionId } }),
+        prisma.chatSession.delete({ where: { id: input.sessionId } }),
+      ]);
+
+      return { ok: true };
+    }),
 });
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { trpc } from '@/utils/trpc';
 import { Button } from '@/components/ui/button';
 import { Menu } from 'lucide-react';
@@ -10,6 +10,8 @@ import { ChatMessages } from './ChatMessages';
 
 export default function ChatPage() {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { data: user, isLoading } = trpc.auth.getMe.useQuery(undefined, { retry: false });
 
   useEffect(() => {
@@ -25,6 +27,25 @@ export default function ChatPage() {
   const [optimisticMessage, setOptimisticMessage] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+
+  // Load sessionId from URL on mount/user ready
+  useEffect(() => {
+    if (!user) return;
+    const initial = searchParams.get('sessionId');
+    if (initial) setCurrentSessionId(initial);
+  }, [user, searchParams]);
+
+  // Keep URL in sync with selected session
+  useEffect(() => {
+    if (!user) return;
+    const sp = new URLSearchParams(searchParams.toString());
+    if (currentSessionId) {
+      sp.set('sessionId', currentSessionId);
+    } else {
+      sp.delete('sessionId');
+    }
+    router.replace(`${pathname}?${sp.toString()}`);
+  }, [currentSessionId, user, pathname, router, searchParams]);
 
   useEffect(() => {
     if (isSidebarOpen) {
@@ -103,12 +124,20 @@ export default function ChatPage() {
       />
 
       {/* Main Chat */}
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0 relative">
         {!isSidebarOpen && (
             <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(true)} className="absolute top-4 left-4 z-10">
                 <Menu className="h-5 w-5" />
             </Button>
         )}
+
+        {/* Loading overlay for messages */}
+        {currentSessionId && messagesQuery.isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/50 z-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
+          </div>
+        )}
+
         <ChatMessages
           user={user}
           currentSessionId={currentSessionId}
